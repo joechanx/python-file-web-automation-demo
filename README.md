@@ -2,11 +2,31 @@
 
 A lightweight, config-driven Python automation tool for cleaning, merging, deduplicating, and reporting Excel/CSV files in a repeatable workflow.
 
+## UI Version Included
+
+This project now includes a lightweight Streamlit interface so non-technical users can configure field mapping and processing rules without editing raw JSON files.
+
+The UI supports:
+
+- CSV / XLSX upload
+- field mapping through dropdowns
+- required field selection
+- output field selection
+- dedupe rule selection
+- cleanup rule toggles for email, phone, date, and amount
+- preview and download of processed results
+
+Run the UI with:
+
+```bash
+streamlit run app.py
+```
+
 ## Overview
 
 This project demonstrates a practical Python automation workflow for handling repetitive file-processing tasks. It imports multiple Excel and CSV files, normalizes inconsistent column names, cleans common data issues, removes duplicates, generates summary reports, and archives processed files.
 
-The workflow is designed to be **config-driven**, so many column changes can be handled through configuration updates instead of rewriting the core script.
+The workflow is designed to be config-driven, so many column changes can be handled through configuration updates instead of rewriting the core script. The Streamlit UI sits on top of the same processing engine.
 
 ## Why This Project Matters
 
@@ -23,9 +43,10 @@ This project shows how Python can automate that process in a reusable and mainta
 ## Key Highlights
 
 - Batch import of CSV and XLSX files
-- Column alias mapping through JSON config
+- Streamlit UI for non-technical users
+- Column alias mapping through JSON config or UI selections
 - Configurable required fields and output columns
-- Email, phone, and date normalization
+- Email, phone, date, and amount normalization
 - Duplicate removal using configurable keys
 - Summary report generation
 - Rejected rows export
@@ -36,6 +57,7 @@ This project shows how Python can automate that process in a reusable and mainta
 
 ```text
 python-file-automation-demo/
+├─ app.py
 ├─ config/
 │  ├─ column_mapping.json
 │  └─ rules.json
@@ -46,7 +68,8 @@ python-file-automation-demo/
 ├─ samples/
 ├─ src/
 │  ├─ main.py
-│  ├─ config_loader.py
+│  ├─ pipeline.py
+│  ├─ config.py
 │  ├─ reader.py
 │  ├─ cleaner.py
 │  ├─ merger.py
@@ -61,15 +84,15 @@ python-file-automation-demo/
 
 The workflow follows these steps:
 
-1. Read all supported files from `input/`
-2. Normalize incoming column names based on config
+1. Read all supported files from `input/` or from the UI uploader
+2. Normalize incoming column names based on config or UI-selected mapping
 3. Validate required fields
 4. Clean selected columns
 5. Merge all records into a single dataset
 6. Remove duplicates using configured keys
 7. Export clean output files
 8. Write logs and summary reports
-9. Move processed files to `archive/`
+9. Move processed files to `archive/` in CLI mode
 
 ## Supported File Types
 
@@ -78,64 +101,13 @@ The workflow follows these steps:
 
 ## Configuration-Driven Design
 
-This project uses external JSON configuration so the workflow is easier to maintain.
-
-### `config/column_mapping.json`
-
-Used to map multiple source column names into standard internal names.
-
-Example:
-
-```json
-{
-  "Email": "email",
-  "E-mail": "email",
-  "email_address": "email",
-  "Phone": "phone",
-  "mobile": "phone",
-  "Customer Name": "name"
-}
-```
-
-### `config/rules.json`
-
-Used to control validation and processing rules.
-
-Example:
-
-```json
-{
-  "required_columns": ["name", "email"],
-  "dedupe_keys": ["email"],
-  "output_columns": ["name", "email", "phone", "date"],
-  "drop_columns": [],
-  "cleaning_rules": {
-    "email": "lowercase",
-    "phone": "digits_only",
-    "date": "date_iso",
-    "name": "strip"
-  }
-}
-```
-
-## Why Config Matters
-
-Instead of hardcoding every column rule inside Python logic, this project allows many changes to be handled through config updates.
-
-Examples of changes that can often be handled without rewriting the main workflow:
-
-- renaming columns
-- adding new column aliases
-- changing required fields
-- changing deduplication keys
-- changing output column order
-- dropping unnecessary columns
+This project uses external JSON configuration so the workflow is easier to maintain. The UI can generate equivalent config choices without requiring manual JSON edits.
 
 ## Amount Normalization Rule
 
 This project also includes an extensible field transformation example for financial values through the `amount_decimal` rule.
 
-In many real business files, amount-related fields may appear in inconsistent formats such as:
+Example source values:
 
 - `1000`
 - `1,000`
@@ -143,7 +115,7 @@ In many real business files, amount-related fields may appear in inconsistent fo
 - `NT$ 1,000.5`
 - `(1,200.75)`
 
-The workflow can normalize these values into a consistent decimal format, for example:
+Normalized output values:
 
 - `1000.00`
 - `1000.00`
@@ -151,52 +123,9 @@ The workflow can normalize these values into a consistent decimal format, for ex
 - `1000.50`
 - `-1200.75`
 
-This makes the automation more practical for client-facing use cases where spreadsheet exports often contain currency symbols, separators, or accounting-style negative values.
-
-### Why This Matters
-
-This rule demonstrates that the workflow is not limited to column mapping and basic cleanup only. It can also be extended with custom Python-based transformation rules for fields that require business-oriented normalization.
-
-That makes the project closer to a real deliverable automation solution:
-
-- schema changes can be handled through JSON config
-- custom transformation logic can be added through reusable Python rules
-
-### Example Configuration
-
-In `config/rules.json`:
-
-```json
-{
-  "cleaning_rules": {
-    "amount_decimal": ["amount"]
-  }
-}
-```
-
-In `config/column_mapping.json`, multiple source columns can be mapped to the standard `amount` field, such as:
-
-- `amount`
-- `total_amount`
-- `price`
-- `order_amount`
-- `payment_amount`
-- `invoice_amount`
-
-### Business Value
-
-This design reflects a more realistic automation workflow for operational or finance-related spreadsheets, where both structural flexibility and field-level normalization are important.
-
-Instead of building a one-off script for a single file format, the project demonstrates how to support evolving input schemas while keeping the processing logic maintainable and extensible.
-
 ## Installation
 
 ### 1. Clone the repository
-
-```bash
-git clone https://github.com/your-username/python-file-automation-demo.git
-cd python-file-automation-demo
-```
 
 ### 2. Create and activate a virtual environment
 
@@ -220,7 +149,13 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Run the Project
+## Run the UI
+
+```bash
+streamlit run app.py
+```
+
+## Run the CLI Version
 
 Place your input files into the `input/` folder, then run:
 
@@ -237,129 +172,17 @@ After execution, the project will generate files such as:
 - `output/rejected_rows.csv`
 - `logs/process.log`
 
-### Example `summary.json`
-
-```json
-{
-  "files_processed": 3,
-  "rows_read": 120,
-  "rows_after_cleaning": 108,
-  "duplicates_removed": 9,
-  "invalid_rows": 3,
-  "output_file": "output/master.csv"
-}
-```
-
-## Example Use Case
-
-Imagine a team receives multiple files from different sources:
-
-- one file uses `Email`
-- another uses `email_address`
-- another uses `E-mail`
-
-Some rows contain:
-
-- uppercase emails
-- phone numbers with symbols
-- inconsistent date formats
-- duplicate contacts
-
-This tool standardizes and cleans all of that automatically, then exports one clean master dataset and a summary report.
-
-## Before vs After
-
-### Before
-
-- Multiple messy Excel/CSV files
-- Different column names for the same data
-- Duplicate records
-- Inconsistent formatting
-- Manual repetitive cleanup
-
-### After
-
-- One clean merged file
-- Standardized columns
-- Normalized values
-- Duplicate records removed
-- Summary report generated
-- Process log saved
-- Input files archived
-
-## Testing
-
-Run tests with:
-
-```bash
-pytest -q
-```
-
-## Screenshot Section
-
-You can optionally add screenshots here for stronger portfolio presentation.
-
-Suggested screenshots:
-
-1. messy input files
-2. clean `master.csv`
-3. `summary.json`
-4. `process.log`
-
-Example section:
-
-```markdown
-## Screenshots
-
-### Input Files
-![Input Files](samples/screenshots/input-files.png)
-
-### Clean Master Output
-![Master Output](samples/screenshots/master-output.png)
-
-### Summary Report
-![Summary Report](samples/screenshots/summary-report.png)
-```
-
 ## Portfolio Positioning
 
 This project is suitable for showcasing skills in:
 
 - Python automation
 - Excel/CSV processing
-- File workflow automation
-- Data cleanup automation
-- Reporting automation
-- Configurable scripting
+- file workflow automation
+- config-driven scripting
+- lightweight internal tools
+- user-friendly data operations UI
 
 ## Business Value
 
-This project is designed to demonstrate how Python can reduce repetitive manual work in business operations.
-
-It is not just a one-off script. It shows how to build a reusable automation workflow that remains maintainable when file schemas evolve over time.
-
-This project demonstrates both config-driven schema handling and extensible field transformation rules, making it suitable for automation scenarios where input files change over time and certain fields require standardized business formatting.
-
-## Possible Future Improvements
-
-- CLI arguments for custom input/output paths
-- YAML config support
-- Excel formatting for final reports
-- Email notification after processing
-- Scheduled execution
-- Simple web UI for non-technical users
-- Docker packaging
-- API trigger support
-
-## Tech Stack
-
-- Python
-- pandas
-- openpyxl
-- pathlib
-- logging
-- JSON configuration
-
-## License
-
-This project is provided for demonstration and portfolio purposes.
+This project demonstrates both config-driven schema handling and a simple UI layer for non-technical users, making it more suitable for real client delivery than a one-off script.
