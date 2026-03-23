@@ -1,0 +1,4 @@
+name,email,phone,date,source_file,_error_reason
+David Tsai,,0919000000,2026-03-22,customers_february.xlsx,missing_required_fields:email
+,missing_name@example.com,0933444555,2026-03-21,customers_january.csv,missing_required_fields:name
+Fiona Kao,fiona@example.com,,2026-03-22,leads_sample.csv,missing_required_fields:phone

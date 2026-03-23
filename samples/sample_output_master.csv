@@ -1,0 +1,5 @@
+name,email,phone,date,source_file,_error_reason
+Alice Chen Duplicate,alice@example.com,0912345678,2026-03-19,customers_february.xlsx,
+Cathy Wu,cathy@example.com,0212345678,2026-03-21,customers_february.xlsx,
+Bob Lin,bob@example.com,0922111333,2026-03-20,customers_january.csv,
+Eric Huang,eric@example.com,0900123456,2026-03-22,leads_sample.csv,

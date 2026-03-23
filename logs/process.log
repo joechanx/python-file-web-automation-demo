@@ -1,0 +1,4 @@
+2026-03-22 14:34:02,555 | INFO | Archived processed file: customers_february.xlsx
+2026-03-22 14:34:02,556 | INFO | Archived processed file: customers_january.csv
+2026-03-22 14:34:02,556 | INFO | Archived processed file: leads_sample.csv
+2026-03-22 14:34:02,556 | INFO | Processing completed: {'files_processed': 3, 'rows_read': 8, 'rows_after_cleaning': 4, 'duplicates_removed': 1, 'invalid_rows': 3, 'output_file': 'output/master.csv'}
