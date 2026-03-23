@@ -9,7 +9,7 @@ A lightweight, config-driven Python automation tool with a simple Streamlit UI f
 > Upload spreadsheet files, map columns through the UI, run the automation workflow, and download cleaned output files.
 
 <p align="center">
-  <img src="samples/screenshots/file-automation-cover.png" alt="Python File Automation Demo" width="900">
+  <img src="samples/file-automation-cover.png" alt="Python File Automation Demo" width="900">
 </p>
 
 <p align="center">
