@@ -11,7 +11,7 @@ A lightweight, Railway-ready Python automation demo with Streamlit UI for two co
 
 > Upload spreadsheet files or enter public URLs, then run a reusable automation workflow that extracts, cleans, deduplicates, and exports business-ready output files.
 
-![Process](samples\file-automation-cover.png)
+![Process](samples/file-automation-cover.png)
 
 ## What This Demo Shows
 
