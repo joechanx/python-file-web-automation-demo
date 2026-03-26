@@ -124,6 +124,24 @@ def summary_to_json_bytes(summary: dict) -> bytes:
     return json.dumps(summary, indent=2, ensure_ascii=False).encode('utf-8')
 
 
+def format_multivalue_text(value: object) -> str:
+    if value is None or pd.isna(value):
+        return '(none)'
+    text_value = str(value).strip()
+    if not text_value:
+        return '(none)'
+    parts = [part.strip() for part in text_value.split(';') if part.strip()]
+    return '\n'.join(parts) if parts else text_value
+
+
+def build_extracted_preview_dataframe(dataframe: pd.DataFrame) -> pd.DataFrame:
+    preview = dataframe.copy()
+    for column in ('emails_found', 'phones_found'):
+        if column in preview.columns:
+            preview[column] = preview[column].apply(format_multivalue_text)
+    return preview.fillna('')
+
+
 def get_available_input() -> dict:
     source_mode = st.radio(
         'Data source',
@@ -371,7 +389,24 @@ def main() -> None:
 
     if 'Extracted raw data' in tab_lookup:
         with tab_lookup['Extracted raw data']:
-            st.dataframe(result['extracted'], use_container_width=True)
+            extracted = result['extracted'].copy()
+            st.caption('Preview of the raw extracted webpage fields before the final output step.')
+            st.dataframe(build_extracted_preview_dataframe(extracted), use_container_width=True, hide_index=True)
+
+            if not extracted.empty:
+                st.markdown('#### Full extracted contact values')
+                for index, row in extracted.iterrows():
+                    label = row.get('source_url') or f'Record {index + 1}'
+                    with st.expander(str(label), expanded=False):
+                        if 'page_title' in extracted.columns:
+                            st.write(f"**Page title:** {row.get('page_title') or '(none)'}")
+                        st.write('**Emails found**')
+                        st.code(format_multivalue_text(row.get('emails_found')))
+                        st.write('**Phones found**')
+                        st.code(format_multivalue_text(row.get('phones_found')))
+                        st.write(f"**Fetch status:** {row.get('fetch_status') or '(none)'}")
+                        if row.get('fetch_error'):
+                            st.write(f"**Fetch error:** {row.get('fetch_error')}")
     with tab_lookup['Clean output']:
         st.dataframe(result['output'], use_container_width=True)
     with tab_lookup['Rejected rows']:
@@ -379,13 +414,16 @@ def main() -> None:
     with tab_lookup['Summary']:
         st.json(summary)
 
-    download_left, download_right, download_third = st.columns(3)
-    with download_left:
+    download_columns = st.columns(4 if result.get('extracted') is not None else 3)
+    with download_columns[0]:
         st.download_button('Download master.csv', data=dataframe_to_csv_bytes(result['output']), file_name='master.csv', mime='text/csv', use_container_width=True)
-    with download_right:
+    with download_columns[1]:
         st.download_button('Download rejected_rows.csv', data=dataframe_to_csv_bytes(result['rejected']), file_name='rejected_rows.csv', mime='text/csv', use_container_width=True)
-    with download_third:
+    with download_columns[2]:
         st.download_button('Download summary.json', data=summary_to_json_bytes(summary), file_name='summary.json', mime='application/json', use_container_width=True)
+    if result.get('extracted') is not None:
+        with download_columns[3]:
+            st.download_button('Download extracted_web_records.csv', data=dataframe_to_csv_bytes(result['extracted']), file_name='extracted_web_records.csv', mime='text/csv', use_container_width=True)
 
     with st.expander('Download generated config', expanded=False):
         config_left, config_right = st.columns(2)

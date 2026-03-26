@@ -47,7 +47,7 @@ def test_process_urls_extracts_and_processes_web_records() -> None:
         return """
         <html>
           <head><title>Example Title</title><meta name="description" content="Demo description"></head>
-          <body><h1>Example Heading</h1><p>Email contact@example.com</p></body>
+          <body><h1>Example Heading</h1><p>Email contact@example.com and sales@example.com</p></body>
         </html>
         """
 
@@ -79,3 +79,5 @@ def test_process_urls_extracts_and_processes_web_records() -> None:
     assert 'source_url' in result['output'].columns
     assert result['output'].iloc[0]['source_url'] == 'https://example.com'
     assert len(result['extracted']) == 2
+    assert result['extracted'].iloc[0]['emails_found'] == 'contact@example.com; sales@example.com'
+    assert result['output'].iloc[0]['emails_found'] == 'contact@example.com; sales@example.com'

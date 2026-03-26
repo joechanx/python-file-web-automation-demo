@@ -42,6 +42,8 @@ Single URL / URL list -> webpage extraction -> structured records -> cleaning ->
 
 The URL intake workflow can extract these fields from public webpages:
 
+For web extraction demos, the UI now includes a dedicated raw extraction preview and an `extracted_web_records.csv` download so multi-value fields such as `emails_found` and `phones_found` can be reviewed in full before or alongside the cleaned output.
+
 - `source_url`
 - `page_title`
 - `meta_description`
@@ -80,6 +82,7 @@ This demo is intentionally designed around that end-to-end use case.
 - deduplication with configurable keys
 - rejected rows export
 - summary JSON generation
+- dedicated extracted-web-records preview and CSV download for full email/phone inspection
 - Railway-ready deployment
 
 ## Project Structure

@@ -34,3 +34,22 @@ def test_extract_record_from_html_returns_expected_fields() -> None:
     assert record['emails_found'] == 'sales@example.com'
     assert '555' in record['phones_found']
     assert record['fetch_status'] == 'ok'
+
+
+def test_extract_record_from_html_keeps_multiple_emails() -> None:
+    html = """
+    <html>
+      <body>
+        <p>Contact press@example.org and fundraising@example.org for more information.</p>
+      </body>
+    </html>
+    """
+
+    record = extract_record_from_html(
+        url='https://example.org/contact',
+        html=html,
+        extract_fields=['emails_found'],
+    )
+
+    assert record['emails_found'] == 'press@example.org; fundraising@example.org'
+
